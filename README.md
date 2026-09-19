@@ -1,4 +1,4 @@
-# 硬件插帧播放 · FrameInterp
+# FrameInterp（硬件插帧播放）— Mac 插帧播放器 · SVP4 Pro 的原生替代
 
 **macOS 上 SVP4 Pro 的原生替代品。** 用 Apple 的**神经引擎**（Neural Engine / 媒体引擎）做实时补帧，
 把 24 / 25 / 30fps 的片子补成 60 / 96 / 120fps。原生 arm64，**不需要 Rosetta，不需要 VapourSynth，不烧 CPU**。
@@ -6,6 +6,11 @@
 > 一句话：**24fps → 60fps 满帧播放，只占 0.12 个 CPU 核心。**
 
 [English](README.en.md) · [下载最新版](https://github.com/lrylnx/frameinterp/releases/latest)
+
+> **你搜的可能就是这些词** —— Mac 插帧播放器 · Mac 补帧播放器 · 硬件插帧播放 ·
+> Mac 视频补帧 60fps · 番剧补帧不掉帧 · **SVP4 Pro 的 Mac 替代 / SVP4 平替** ·
+> macOS 上不烧 CPU 的补帧 · Apple 神经引擎插帧 · ANE 插帧 · M 系列芯片视频补帧 ·
+> smooth video playback on Mac / frame interpolation macOS
 
 ---
 
@@ -44,7 +49,7 @@
 
 ## 和 SVP4 Pro 的差别
 
-| | SVP4 Pro (Mac) | 硬件插帧播放 |
+| | SVP4 Pro (Mac) | FrameInterp |
 |---|---|---|
 | 运动搜索 | CPU（mvtools，多核跑满） | **硬件**（`VTFrameProcessor`） |
 | 帧渲染 | OpenCL（老 API，Apple 已不推进） | 同一颗处理器内完成 |
@@ -120,8 +125,9 @@ CPU 7.0%   (0.07 核)   无卡顿
 
 ## 下载与安装
 
-1. 到 [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest) 下载 `FrameInterp-1.1-arm64.dmg`
-2. 打开 DMG，把「硬件插帧播放.app」**拖进 Applications**
+1. 到 [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest) 下载 `FrameInterp-1.2-arm64.dmg`
+2. 打开 DMG，把「FrameInterp.app」**拖进 Applications**
+   （**中文系统上它会显示成「硬件插帧播放」** —— 同一个 App，名字跟着系统语言走）
 3. 首次打开如果被 Gatekeeper 拦下（提示"无法验证开发者"）：
    **右键点 app →「打开」→ 再点「打开」**。本 App 是 ad-hoc 签名，没买 Apple 开发者证书，
    但不需要任何特殊权限、不联网、不上传任何东西。
@@ -137,7 +143,7 @@ CPU 7.0%   (0.07 核)   无卡顿
 
 **打开方式**
 - 双击 App → 空窗口 → 拖视频进去
-- 视频上右键 →「打开方式」→ 硬件插帧播放
+- 视频上右键 →「打开方式」→ FrameInterp（中文系统显示「硬件插帧播放」）
 - 直接把视频拖到 Dock 上的图标
 
 **快捷键**
@@ -155,7 +161,7 @@ CPU 7.0%   (0.07 核)   无卡顿
 **支持拖进来的格式**
 - 原生能解的（mp4 / mov / m4v）**直接播，零依赖**
 - mkv / rmvb / flv 这类容器会自动用系统的 `ffmpeg` 做一次**转封装**（`-c copy`，不重编码，几秒完成），
-  缓存到 `~/Library/Caches/硬件插帧播放/`，同一个文件下次秒开
+  缓存到 `~/Library/Caches/FrameInterp/`，同一个文件下次秒开
 - **网络流**（m3u8 / mp4 直链）也能放，边下边播；这条需要本机装了 `ffmpeg`（`brew install ffmpeg`）
 
 **界面**：鼠标不动 3 秒，控制条和指针一起自动隐藏；动一下鼠标就回来。
@@ -164,6 +170,10 @@ CPU 7.0%   (0.07 核)   无卡顿
 （`IOPMAssertion` / `PreventUserIdleDisplaySleep`，就是 `caffeinate -d` 用的那个），
 屏幕会一直亮着，不会播着播着慢慢变暗。暂停 / 播完 / 关窗口立刻释放。
 只想听声音的话，菜单「播放 → 播放时保持屏幕常亮」可以把勾去掉。
+
+> 想自己确认一下：播放中执行 `pmset -g assertions | grep FrameInterp`，应该看到
+> `PreventUserIdleDisplaySleep named: "FrameInterp: video playback"`，计数为 `1`；
+> 暂停或退出后回到 `0`。
 
 ---
 
@@ -213,6 +223,12 @@ A：中低速运动、干净素材上两者接近；**大面积遮挡**（比如
 **Q：支持字幕吗？**
 A：**当前版本不渲染字幕。** 这是已知缺口，见下面的「已知限制」。
 
+**Q：为什么 App 叫 FrameInterp，界面和窗口标题却是中文？**
+A：名字**跟着系统语言走**。中文系统上它显示为「硬件插帧播放」，其它语言显示 FrameInterp ——
+通过 `zh-Hans.lproj` 本地化实现，是同一个 App（bundle id 始终是 `cn.zxwzz.hipl`）。
+另注：缓存和日志目录名固定为 `~/Library/Caches/FrameInterp/`，**不跟随语言**
+（否则换一次系统语言就会写到另一个目录，老缓存全部对不上）。
+
 **Q：会修改我的视频文件吗？**
 A：不会。插帧是**播放时实时算**的，不落盘、不改文件。
 
@@ -231,6 +247,8 @@ A：能，`m3u8` / `mp4` 直链都行，边下边播。需要本机有 `ffmpeg`�
 如实列出来，省得你装完才发现：
 
 - **不渲染字幕 / 字幕轨不支持**。外挂 srt / ass 也读不了。看番的话这是个实际缺口。
+- **界面目前只有中文**（菜单、状态浮层、提示语）。1.2 只把**应用名**做了本地化，
+  英文界面还没做 —— 英文系统上你会看到名叫 FrameInterp、菜单却是中文。
 - **只能跑在 macOS 26+ 和 Apple Silicon 上**，不是"没适配"，是硬件和 API 的硬门槛。
 - **只有 2× / 4× 两档**，没有 3× / 5×（原理见上）。
 - **不支持直播流**（时长不确定的流），架构是按"可 seek 的定长素材"设计的。
@@ -251,6 +269,22 @@ A：能，`m3u8` / `mp4` 直链都行，边下边播。需要本机有 `ffmpeg`�
 
 ---
 
+## 版本历史
+
+| 版本 | 变更 |
+|---|---|
+| **1.2** | 应用名改为 **FrameInterp**（中文系统仍显示「硬件插帧播放」）；可执行文件与缓存目录同步更名（老目录自动搬迁）；电源断言的登记名改为 ASCII（见下） |
+| 1.1 | **修复播放中屏幕自动变暗直至休眠**：播放期间持有 `IOPMAssertion`；新增菜单开关「播放时保持屏幕常亮」 |
+| 1.0 | 首次公开版本 |
+
+> **1.2 里那个「断言名改 ASCII」的小修正**，值得单说一句：1.1 的断言名是中文的
+> （`硬件插帧播放 正在播放视频`）。断言本身工作正常，但 `pmset -g assertions` 会把它
+> 渲染成 `named: ""` —— **名字被整个丢掉**。同一个进程里同时挂一条 ASCII 名做对照，
+> ASCII 那条显示正常，所以确认是中文名的问题。断言名唯一的作用就是"排查时看出是谁
+> 把屏幕钉亮的"，名字没了就等于白持，因此改成固定的 ASCII 名。
+
+---
+
 ## 反馈
 
 遇到问题请开 [Issue](https://github.com/lrylnx/frameinterp/issues)，**请务必附上**：
@@ -259,9 +293,9 @@ A：能，`m3u8` / `mp4` 直链都行，边下边播。需要本机有 `ffmpeg`�
 2. 视频的源帧率与分辨率
 3. 播放中按 `i` 打开 HUD 后的截图（里面有实测帧率、CPU、卡顿计数）
 
-诊断文件在 `~/Library/Caches/硬件插帧播放/` 下（`stat.txt` / `events.log`），
+诊断文件在 `~/Library/Caches/FrameInterp/` 下（`stat.txt` / `events.log`），
 报问题时一并附上能省很多来回。
 
 ---
 
-*「硬件插帧播放」— 因为那块硬件本来就在你机器里。*
+*FrameInterp（硬件插帧播放）— 因为那块硬件本来就在你机器里。*

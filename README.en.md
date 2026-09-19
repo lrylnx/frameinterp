@@ -8,6 +8,12 @@ video into 60 / 96 / 120 fps. Native arm64. **No Rosetta. No VapourSynth. No CPU
 
 [简体中文](README.md) · [Download the latest release](https://github.com/lrylnx/frameinterp/releases/latest)
 
+> **Aliases you might be searching for** — Mac frame interpolation player · macOS frame
+> interpolation · video interpolation for Apple Silicon · smooth video playback on Mac ·
+> 24fps to 60fps realtime · **SVP4 Pro alternative for Mac / SVP4 replacement** ·
+> GPU-free / low-CPU frame interpolation · Neural Engine interpolation ·
+> anime 60fps playback on macOS · judder-free playback
+
 ---
 
 ## Table of contents
@@ -126,7 +132,7 @@ More screenshots:
 
 ## Download & install
 
-1. Grab `FrameInterp-1.1-arm64.dmg` from [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest)
+1. Grab `FrameInterp-1.2-arm64.dmg` from [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest)
 2. Open the DMG and **drag the app into Applications**
 3. If Gatekeeper blocks the first launch ("unidentified developer"):
    **right-click the app → Open → Open**. The app is ad-hoc signed (no paid Apple Developer
@@ -172,6 +178,10 @@ Double-click the app, drop a video in. That's it.
 screen stays on and won't slowly fade to black mid-movie. It's released the moment you pause,
 finish, or close the window. If you only want audio, uncheck
 *Play menu → Keep display awake during playback*.
+
+> To check it yourself: while playing, run `pmset -g assertions | grep FrameInterp`. You should see
+> `PreventUserIdleDisplaySleep named: "FrameInterp: video playback"` with a count of `1`;
+> it returns to `0` once paused or quit.
 
 ---
 
@@ -244,6 +254,9 @@ Listed plainly, so you find out now rather than after installing:
 
 - **No subtitle rendering, no subtitle track support.** Not embedded, not external srt/ass.
   If you watch subtitled anime, this is a real gap.
+- **The in-app UI is currently Chinese-only.** Only the *app name* is localized; menus, the
+  status HUD, and on-screen notices are still hard-coded Chinese. An English-language UI is
+  planned but not shipped yet — don't expect a fully localized interface.
 - **macOS 26+ and Apple Silicon only** — not a lack of porting effort, it's a hardware/API floor.
 - **Only 2× and 4×** — no 3× or 5× (see above for why).
 - **No live streams** (indeterminate duration); the architecture assumes seekable, finite media.
@@ -264,6 +277,23 @@ documentation and download links only — **no source code** — and does not ac
 
 ---
 
+## Changelog
+
+| Version | Changes |
+|---|---|
+| **1.2** | App renamed to **FrameInterp** (still shown as "硬件插帧播放" on Chinese systems); executable and cache directory renamed to match (the legacy directory is migrated automatically); the power-assertion name is now ASCII (see below) |
+| 1.1 | **Fixed the display dimming and eventually sleeping during playback** — playback now holds an `IOPMAssertion`; added the *Keep display awake during playback* menu toggle |
+| 1.0 | First public release |
+
+> The small fix in 1.2 worth calling out: in 1.1 the power assertion was named in Chinese
+> (`硬件插帧播放 正在播放视频`). The assertion worked, but `pmset -g assertions` rendered it as
+> `named: ""` — **the name was dropped entirely**. Holding a second, ASCII-named assertion from the
+> same process showed up correctly, confirming the non-ASCII name was the cause. Since the only
+> purpose of the name is to make it obvious *who* is keeping the display awake, it now uses a fixed
+> ASCII string.
+
+---
+
 ## Feedback
 
 Please open an [Issue](https://github.com/lrylnx/frameinterp/issues) and **include**:
@@ -272,7 +302,7 @@ Please open an [Issue](https://github.com/lrylnx/frameinterp/issues) and **inclu
 2. The source frame rate and resolution of the video
 3. A screenshot of the HUD (press `i` while playing) — it shows measured fps, CPU, and the stutter counter
 
-Diagnostic files live in `~/Library/Caches/硬件插帧播放/` (`stat.txt`, `events.log`).
+Diagnostic files live in `~/Library/Caches/FrameInterp/` (`stat.txt`, `events.log`).
 Attaching them saves a lot of back-and-forth.
 
 ---
