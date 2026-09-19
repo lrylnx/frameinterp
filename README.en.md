@@ -21,6 +21,7 @@ video into 60 / 96 / 120 fps. Native arm64. **No Rosetta. No VapourSynth. No CPU
 - [The problem](#the-problem)
 - [How it differs from SVP4 Pro](#how-it-differs-from-svp4-pro)
 - [Measured numbers](#measured-numbers)
+- [Quality enhancement](#quality-enhancement-gpu-upscale--sharpen)
 - [Requirements](#requirements)
 - [Download & install](#download--install)
 - [Usage](#usage)
@@ -122,6 +123,58 @@ More screenshots:
 
 ---
 
+## Quality enhancement (GPU upscale + sharpen)
+
+> New in 1.4. **When playing 1080p footage, each frame is first upscaled to the physical pixel
+> size of your window and adaptively sharpened, then handed to the display layer as a 1:1 blit** —
+> instead of letting the display layer bilinearly stretch 1080p to the window. The cost lands
+> almost entirely on the GPU: **CPU rises by only 0.03 of a core, frame rate unchanged.**
+
+The old path was: decode 1080p → the display layer bilinearly scales it up to window size.
+Bilinear **kills high frequencies**, so text edges, textures and fan blades look soft. Now an
+extra GPU pass sits before the display layer:
+
+- **Upscale** to the pixel size the display layer actually needs (derived from the screen's
+  backing scale and the real on-screen height; upscale only, never downscale)
+- **Sharpen** applied to the luma channel only, using an unsharp mask of "1 source-pixel radius"
+  with contrast-adaptive clamping — flat areas are left alone (so compression noise isn't
+  amplified), only true edges get sharpened
+- Done in a **single YCbCr bi-planar pass** with **no RGB round-trip**, hence no colour shift
+
+**Cost** (M4 / 1500×900 window / 1080p source):
+
+| | CPU | Measured frame rate |
+|---|---|---|
+| Enhancement on | **0.22 core** | 60.96 fps |
+| Enhancement off | 0.19 core | 60.84 fps |
+
+**Image quality** (same kernel, only the sharpening strength varied — the cleanest control):
+
+| Region | Edge sharpness change |
+|---|---|
+| Keycap detail / texture | **+18%** |
+| Text block on the chassis | **+22%** |
+| Flat gradient areas | **0%** (untouched) |
+
+Real-render A/B (same playback position, same window geometry): edge sharpness **+6.8%**.
+
+![Quality enhancement comparison (top: off; bottom: on)](docs/quality-enhance.png)
+
+> Pixels that deviate from the "sharpen 0" reference by **>32/255** account for just **0.003%** —
+> no dark or bright halos.
+
+**Why not Apple's ANE super-resolution?** `VTFrameProcessor` does contain super-resolution and
+noise-filter processors, but on macOS 26.x all of them measured unusable: the low-latency scaler is
+capped by a **921,600-pixel budget** (max 960×960 source, and it shares that budget with
+interpolation), the quality-priority scaler **only supports 4×** and its model must be downloaded,
+and the temporal noise filter is a **silent passthrough** (output pixel-identical to input).
+Real-time quality gain therefore has to come from the GPU path. (macOS 27 fills these processors
+in; this will be re-evaluated then.)
+
+**Don't want it?** Press `s`, or use the ✨ button on the control bar.
+
+---
+
 ## Requirements
 
 **Both are hard requirements:**
@@ -139,7 +192,7 @@ More screenshots:
 
 ## Download & install
 
-1. Grab `FrameInterp-1.3-arm64.dmg` from [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest)
+1. Grab `FrameInterp-1.4-arm64.dmg` from [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest)
 2. Open the DMG and **drag the app into Applications**
 3. If Gatekeeper blocks the first launch ("unidentified developer"):
    **right-click the app → Open → Open**. The app is ad-hoc signed (no paid Apple Developer
@@ -288,6 +341,7 @@ documentation and download links only — **no source code** — and does not ac
 
 | Version | Changes |
 |---|---|
+| **1.4** | Added **GPU quality enhancement** (upscale to the display's real pixel size + contrast-adaptive luma sharpening, single YCbCr pass, **only 0.03 core of extra CPU**); toggle with `s` or the ✨ control-bar button. Also established that on macOS 26.x all of the ANE super-resolution / noise-filter processors are unusable (see "Quality enhancement" above) |
 | **1.3** | **Fixed 1080p-and-above interpolation silently failing on macOS 26.x.** The interpolation unit's maximum input size depends on the OS version (921,600 pixels on 26.x, higher on 27). When exceeded, `startSession` reports no error — only the actual calls fail — so interpolation broke completely while the HUD still showed the target frame rate. Now the limit is probed at runtime, oversized sources are downscaled on the interpolation path only (original frames keep full resolution), and failures are visible on the HUD |
 | **1.2** | App renamed to **FrameInterp** (still shown as "硬件插帧播放" on Chinese systems); executable and cache directory renamed to match (the legacy directory is migrated automatically); the power-assertion name is now ASCII (see below) |
 | 1.1 | **Fixed the display dimming and eventually sleeping during playback** — playback now holds an `IOPMAssertion`; added the *Keep display awake during playback* menu toggle |
