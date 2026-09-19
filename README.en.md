@@ -75,7 +75,7 @@ software algorithms. That's a fundamental trade-off, and it's what buys the real
 
 ## Measured numbers
 
-Test machine: Apple Silicon, 10 cores, fanless laptop; 1080p source; external 2560×1440 @ 180 Hz display.
+Test machine: Apple Silicon (10 cores, fanless laptop), **macOS 27**; 1080p source; external 2560×1440 @ 180 Hz display.
 
 ```
 source 29.999 fps  ->  interpolated 60.00 fps  [2x]  screen 180Hz
@@ -86,6 +86,13 @@ source 23.943 fps  ->  interpolated 95.77 fps  [4x]  screen 180Hz
 measured 96.3 fps     2065 frames out  buffer 0.08s   playing
 CPU 7.0%   (0.07 core)   no stutter
 ```
+
+> ⚠️ **The 1080p figures above were measured on macOS 27.** On macOS 26.x the interpolation
+> unit caps the input at **921,600 pixels** (= 1280×720), so 1080p is over the limit.
+> Since **1.3** the player automatically downscales *only the interpolation path* to 1280×720
+> and scales the result back up — you still get a 1080p picture at 60fps, but the
+> **interpolated** frames carry 720p-level detail. Original frames (every second frame)
+> keep their full resolution. The actual interpolation size is shown on the HUD.
 
 These are read straight off the player's own HUD (press `i` while playing).
 The same HUD, interpolation on vs off:
@@ -132,7 +139,7 @@ More screenshots:
 
 ## Download & install
 
-1. Grab `FrameInterp-1.2-arm64.dmg` from [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest)
+1. Grab `FrameInterp-1.3-arm64.dmg` from [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest)
 2. Open the DMG and **drag the app into Applications**
 3. If Gatekeeper blocks the first launch ("unidentified developer"):
    **right-click the app → Open → Open**. The app is ad-hoc signed (no paid Apple Developer
@@ -281,6 +288,7 @@ documentation and download links only — **no source code** — and does not ac
 
 | Version | Changes |
 |---|---|
+| **1.3** | **Fixed 1080p-and-above interpolation silently failing on macOS 26.x.** The interpolation unit's maximum input size depends on the OS version (921,600 pixels on 26.x, higher on 27). When exceeded, `startSession` reports no error — only the actual calls fail — so interpolation broke completely while the HUD still showed the target frame rate. Now the limit is probed at runtime, oversized sources are downscaled on the interpolation path only (original frames keep full resolution), and failures are visible on the HUD |
 | **1.2** | App renamed to **FrameInterp** (still shown as "硬件插帧播放" on Chinese systems); executable and cache directory renamed to match (the legacy directory is migrated automatically); the power-assertion name is now ASCII (see below) |
 | 1.1 | **Fixed the display dimming and eventually sleeping during playback** — playback now holds an `IOPMAssertion`; added the *Keep display awake during playback* menu toggle |
 | 1.0 | First public release |
