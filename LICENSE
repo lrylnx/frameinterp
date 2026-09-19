@@ -1,0 +1,81 @@
+FrameInterp / 硬件插帧播放 — Proprietary License
+Copyright (c) 2026 lrylnx. All rights reserved.
+
+This software is NOT open source. The source code is not published and is not
+included in this repository. This repository contains documentation and
+distribution artifacts only.
+
+--------------------------------------------------------------------------------
+1. GRANT
+--------------------------------------------------------------------------------
+
+Subject to the terms below, you are granted a personal, non-exclusive,
+non-transferable, revocable license to:
+
+  (a) download and install the compiled application ("the Software") on
+      devices that you own or control;
+  (b) use the Software for personal, non-commercial purposes.
+
+--------------------------------------------------------------------------------
+2. RESTRICTIONS
+--------------------------------------------------------------------------------
+
+You may NOT:
+
+  (a) copy, redistribute, sublicense, sell, rent, lease, or otherwise make the
+      Software available to any third party, in whole or in part;
+  (b) modify, adapt, translate, or create derivative works of the Software;
+  (c) reverse engineer, decompile, disassemble, or otherwise attempt to derive
+      the source code, underlying algorithms, or internal structure of the
+      Software, except to the extent such restriction is expressly prohibited
+      by applicable law;
+  (d) remove, obscure, or alter any copyright, trademark, or other proprietary
+      notices contained in or on the Software;
+  (e) repackage the Software, bundle it with other products, or distribute it
+      through any package manager, app store, or mirror;
+  (f) use the Software for any commercial purpose, including but not limited to
+      commercial screening, broadcasting, or paid services, without prior
+      written permission from the copyright holder.
+
+--------------------------------------------------------------------------------
+3. THIRD-PARTY COMPONENTS
+--------------------------------------------------------------------------------
+
+The Software uses Apple system frameworks (VideoToolbox, AVFoundation,
+CoreMedia, CoreVideo, IOKit, AppKit, Network, and related frameworks) that are
+provided by macOS and governed by Apple's own license terms. No third-party
+open-source code is bundled in a form that would require disclosure.
+
+--------------------------------------------------------------------------------
+4. NO WARRANTY
+--------------------------------------------------------------------------------
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. THE ENTIRE RISK AS TO
+THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU.
+
+--------------------------------------------------------------------------------
+5. LIMITATION OF LIABILITY
+--------------------------------------------------------------------------------
+
+IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR
+OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE. THIS INCLUDES, WITHOUT LIMITATION, LOSS OF
+DATA, HARDWARE DAMAGE, OR ANY INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES.
+
+--------------------------------------------------------------------------------
+6. TERMINATION
+--------------------------------------------------------------------------------
+
+This license terminates automatically if you breach any of its terms. Upon
+termination you must stop using the Software and delete all copies in your
+possession or control.
+
+--------------------------------------------------------------------------------
+7. CONTACT
+--------------------------------------------------------------------------------
+
+For licensing inquiries, redistribution requests, or commercial use, open an
+issue at: https://github.com/lrylnx/frameinterp/issues
