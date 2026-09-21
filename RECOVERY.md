@@ -1,6 +1,20 @@
 # 恢复手册：1.4 及更早版本的「设为默认播放器…」导致整机卡死
 
 > **English version below.**
+>
+> ## ✅ 已在真机上验证有效
+>
+> 一台中招的 Mac（安全模式也只剩黑屏 + 鼠标、重启无限风火轮）用下面的
+> **路线 A 全套**跑了一次，重启后**恢复正常**。
+>
+> ⚠️ **关键：路线 A 的四步要一起做完**，尤其是 **A5「把 App 挪走」**。
+> 只清缓存、把 App 留在 `/Applications` 里，很可能重启后**再次卡死** ——
+> 这正是「明明清理过、怎么还是卡」最常见的原因。
+>
+> ⚠️ 另一个同样常见的原因：**命令根本没跑成**。从网页 / 网盘复制多行命令时，
+> 换行会被吃掉、引号会变弯引号、路径开头的 `/` 会被漏掉，而 shell **不会报错**。
+> 所以：**能一行就一行**；多行就用文末那条单行 `curl` 拉脚本跑。
+> 跑完务必看脚本自己打的**复核输出**（剩余缓存数 / App 是否已挪走）。
 
 ## 症状
 
@@ -237,6 +251,19 @@ Finder 行为仍异常（图标不对、双击没反应）的话，在**安全�
 
 ## 清理两轮仍卡死？别再重复第三遍
 
+**先自查一件事**（实测中招的那台就卡在这里）：
+
+```sh
+ls "$D/Applications" | grep -iE "frameinterp|插帧"
+find "$D/private/var/folders" -maxdepth 4 -name "com.apple.LaunchServices*" | head
+```
+
+第一条**必须没有输出**（App 已挪走），第二条也**必须没有输出**（缓存已清）。
+只要 App 还留在 `/Applications` 里，重启后 `lsd` 会再踩同一个坑 ——
+**"清理过还是卡" 多半就是这个**。
+
+两条都干净了还卡，再往下分叉：
+
 同一个药方吃第三遍没有意义 —— 先定位层级。
 
 **只看一件事：黑屏发生在哪一步？**
@@ -295,6 +322,22 @@ mv "$D/Users/$U/Library/Saved Application State" "$D/Users/$U/Library/Saved Appl
 ---
 
 # Recovery Guide (English)
+
+> ## ✅ Confirmed on real hardware
+>
+> A wedged Mac (safe mode showing nothing but a black screen and the cursor, endless
+> beachball on every reboot) was recovered by running **all of Route A** once and rebooting.
+>
+> ⚠️ **Do all four steps of Route A, especially A5 "move the app aside".**
+> Wiping the caches while leaving the app in `/Applications` can bring the freeze
+> straight back on the next boot — this is the most common reason a "cleanup" appears
+> to have done nothing.
+>
+> ⚠️ The other equally common reason: **the commands never actually ran.** Pasting
+> multi-line commands out of a web page or cloud drive eats newlines, turns quotes curly
+> and drops leading slashes — and the shell **says nothing**. So: **prefer one-liners**;
+> for anything longer, use the single-line `curl` at the end of this document and check
+> the script's own verification output (caches remaining / app quarantined).
 
 ## Symptoms
 
@@ -507,6 +550,19 @@ In **Safe Mode**, run Apple's official rebuild:
 Do **not** add `-kill`.
 
 ## Still frozen after two cleanup rounds?
+
+**Check one thing first** (this is exactly where the machine we recovered got stuck):
+
+```sh
+ls "$D/Applications" | grep -iE "frameinterp|插帧"
+find "$D/private/var/folders" -maxdepth 4 -name "com.apple.LaunchServices*" | head
+```
+
+The first command **must print nothing** (app moved aside) and so must the second
+(caches wiped). If the app is still in `/Applications`, `lsd` walks into the same trap
+on the next boot — **that is almost certainly why "I already cleaned it" didn't help**.
+
+Only if both are clean, split by layer:
 
 Running the same fix a third time is pointless — find the layer first.
 
