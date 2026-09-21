@@ -16,6 +16,23 @@ video into 60 / 96 / 120 fps. Native arm64. **No Rosetta. No VapourSynth. No CPU
 
 ---
 
+> ### ⚠️ SECURITY NOTICE (2026-09-21, fixed in 1.5)
+>
+> **The *File → Set as Default Player…* menu in 1.4 and earlier freezes the machine.**
+> To bypass the system's confirmation prompts it wrote Apple's LaunchServices preferences
+> directly and hard-killed the daemon with `killall -9 lsd`, which corrupts the
+> LaunchServices database — the symptom is a **total freeze (the cursor moves, nothing else
+> responds) that keeps happening at the same point after a force restart**.
+>
+> - **Upgrade to 1.5 now** and stop using that menu in older versions.
+> - Already affected? **[Recovery steps are in RECOVERY.md](RECOVERY.md).**
+> - In 1.5 the feature uses only the official system API, backs up the previous values and can
+>   be undone in one click. The price is one system confirmation dialog per content type on
+>   macOS 26.4+ — **that dialog cannot be bypassed**, and the attempt to bypass it is exactly
+>   what caused the incident above.
+
+---
+
 ## Table of contents
 
 - [The problem](#the-problem)
@@ -192,14 +209,30 @@ in; this will be re-evaluated then.)
 
 ## Download & install
 
-1. Grab `FrameInterp-1.4-arm64.dmg` from [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest)
+1. Grab `FrameInterp-1.5-arm64.dmg` from [**Releases**](https://github.com/lrylnx/frameinterp/releases/latest)
 2. Open the DMG and **drag the app into Applications**
 3. If Gatekeeper blocks the first launch ("unidentified developer"):
    **right-click the app → Open → Open**. The app is ad-hoc signed (no paid Apple Developer
    certificate), but it needs **no special permissions, makes no network calls, and uploads nothing**.
 
-> **Want it as your default player?** Menu → *File → Set as Default Player…* associates
-> mp4 / mov / mkv / avi / webm / ts / flv / rmvb and 20 UTIs in one go — **no dialogs, no password**.
+> ⚠️ **SECURITY NOTICE (fixed in 1.5): do not use the "Set as Default Player…" menu in
+> version 1.4 or earlier.** To bypass the system's confirmation prompts, that version
+> wrote Apple's LaunchServices preferences directly and then hard-killed the daemon with
+> `killall -9 lsd` — which **corrupts the LaunchServices database and freezes the whole
+> machine** (the cursor moves, nothing else responds), **and it stays frozen after a force
+> restart**. Machines already affected: see [RECOVERY.md](RECOVERY.md) for the recovery steps.
+> In 1.5 the feature only uses the official system API, backs up the previous values first,
+> and can be undone in one click.
+
+> **Want it as your default player?** Menu → *File → Set as Default Player…*. It uses the
+> official system API to set mp4 / m4v / mov / mkv / avi / webm / ts / flv (8 types) one at a
+> time, **backing up the previous values first**; use *Undo default associations…* in the same
+> menu to restore them.
+>
+> Note: **from macOS 26.4 onward the system shows one confirmation dialog per type** — that is
+> a system restriction with no bypass (1.4 tried to bypass it and caused the incident above).
+> If the dialogs are too much, do it yourself: right-click a video → *Get Info* → *Open with*
+> → pick this player → *Change All…*. One type at a time, entirely safe.
 
 ---
 
@@ -341,6 +374,7 @@ documentation and download links only — **no source code** — and does not ac
 
 | Version | Changes |
 |---|---|
+| **1.5** | **Safety fix: "Set as Default Player…" can no longer freeze the machine.** Version 1.4 and earlier bypassed the system's confirmation prompts by writing Apple's LaunchServices preferences directly and hard-killing the daemon with `killall -9 lsd` — measured to **freeze the entire machine**, and **it stays frozen at the same point after a force restart** (the LaunchServices database is SIGKILLed mid-write, leaving a persistent corrupt state that blocks Finder, the Dock and the login flow). It now uses only the official system API, sets one type at a time, backs up the previous values, and can be undone in one click. Also removed the `public.audiovisual-content` supertype declaration (which claimed audio as well). **Upgrade immediately if you have 1.4 or earlier.** |
 | **1.4** | Added **GPU quality enhancement** (upscale to the display's real pixel size + contrast-adaptive luma sharpening, single YCbCr pass, **only 0.03 core of extra CPU**); toggle with `s` or the ✨ control-bar button. Also established that on macOS 26.x all of the ANE super-resolution / noise-filter processors are unusable (see "Quality enhancement" above) |
 | **1.3** | **Fixed 1080p-and-above interpolation silently failing on macOS 26.x.** The interpolation unit's maximum input size depends on the OS version (921,600 pixels on 26.x, higher on 27). When exceeded, `startSession` reports no error — only the actual calls fail — so interpolation broke completely while the HUD still showed the target frame rate. Now the limit is probed at runtime, oversized sources are downscaled on the interpolation path only (original frames keep full resolution), and failures are visible on the HUD |
 | **1.2** | App renamed to **FrameInterp** (still shown as "硬件插帧播放" on Chinese systems); executable and cache directory renamed to match (the legacy directory is migrated automatically); the power-assertion name is now ASCII (see below) |
